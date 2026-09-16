@@ -1,0 +1,12 @@
+node_modules/
+.pnpm-store/
+tmp/
+output/
+.env
+.env.*
+!.env.example
+*.pdf
+*-Master.md
+*-Tag-Guide.md
+.DS_Store
+Thumbs.db

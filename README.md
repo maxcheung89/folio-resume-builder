@@ -1,0 +1,92 @@
+# Folio — Markdown resume builder
+
+A private, local resume app. Keep a master Markdown profile, choose the content for a job, and download a typeset PDF with embedded fonts and selectable text.
+
+## Download and run locally
+
+**Requirements:** Node.js 20 or newer and a modern browser. Windows is the easiest supported setup because PDF generation uses Windows fonts. No API key or cloud account is needed.
+
+1. Select **Code → Download ZIP** on GitHub and extract the ZIP, or clone this repository.
+2. Install Node.js from https://nodejs.org and open a terminal in the extracted app folder.
+3. Run:
+
+```sh
+npm install
+npm start
+```
+
+4. Open **http://127.0.0.1:4173**. Keep the terminal open while using Folio; press Ctrl+C to stop it.
+
+After the initial install, Windows users can double-click **Start Folio.cmd**. If using pnpm, run `pnpm install --frozen-lockfile` and `pnpm start` instead.
+
+The app listens only on your computer. Set `PORT` to choose another port. Normal use works offline after package installation.
+
+### macOS and Linux
+
+The app server runs on Node.js, but PDF preview/export currently requires compatible regular and bold TrueType font files. Set `FOLIO_FONT_DIR` to a directory containing the files listed under Development below. Arial is selected initially. Supply fonts you are licensed to use; Microsoft fonts are not distributed with this project. Without the selected fonts, PDF preview/export will report a missing-font error.
+
+### Troubleshooting
+
+- **node/npm not recognized:** install Node.js, then open a new terminal.
+- **Connection refused:** run `npm start` and keep its terminal open.
+- **Port already in use:** close your earlier Folio server or choose another `PORT`.
+- **Cannot load fonts:** install the selected font pair or configure `FOLIO_FONT_DIR` as described below.
+- **Your work disappeared:** use the same browser and port; workspaces are stored in browser local storage. Export Markdown backups regularly.
+
+## Workflow
+
+The builder is organized into three tabs:
+
+- **Content**: target role, optional job matching, collapsible job tags, and individual section selections.
+- **Summary**: preview and apply a category draft, edit the active summary, or save a named reusable template. Templates are stored locally per profile. Every profile starts with its own master summary. Write and save reusable category templates using your own experience. Applying a draft changes only the summary, not selected experience.
+- **Design**: four layouts (Modern, Classic, Executive, Compact), four font families, 10/11/12 pt body sizes, four color themes, three spacing settings, and section-order arrows. The screen uses locally installed fonts. Direct PDFs embed the selected font from your computer. Paper size is also set here. The preview renders the actual generated PDF pages using PDF.js; Download PDF saves those same bytes.
+
+Saved resume versions preserve all design settings and section order. Older versions receive defaults for newly added settings. Section order also applies to Markdown exports. The complete master Markdown is not reordered. Summary templates remain available independently of saved resume versions.
+
+On desktop, the controls and paper preview scroll independently, with export controls always visible. Smaller screens use a single column. Tight spacing reduces line, bullet, entry, and section gaps. Alignment is independent of layout and applies to your name, contact details, and section headings; body text remains left aligned. Summary templates, including category drafts, can be deleted and restored with **Restore last deleted template**. Deleting a template leaves your active summary unchanged; the original master summary remains available. Deletions persist per profile across reloads.
+
+In **Content → Personal information**, choose whether to include your name and each contact or eligibility field. These choices affect the preview, PDF, and selected Markdown export, and are retained in saved versions. The master profile keeps all original fields. In **Design**, the Left/Center buttons beside Layout control alignment independently of the selected style.
+
+1. Start with the clearly labeled example, or choose **Import Markdown**. Import opens the editor for review; click **Apply profile** to use it. Applying resets current selections to all content. Save a version first if you want to retain a tailored selection.
+2. Enter the target role. Select individual skills, positions, projects, and achievement bullets. Open Summary to edit the introduction for this resume.
+3. Optionally paste a job description and click **Select matching content**. Exact, case-insensitive skill matching selects relevant skills and matching achievements. This is a keyword helper, not an AI rewrite or hiring score. Review all sections yourself.
+4. Choose a layout, font, size, spacing, alignment, and A4 or US Letter in Design.
+5. **Download PDF** creates a file directly, without a print dialog. It embeds fonts, preserves selectable text, uses the selected point size and paper dimensions, wraps content, and adds page numbers for multipage resumes. Hidden personal fields and unselected bullets are excluded. The live preview displays that exact PDF, including fonts, wrapping, margins, and page breaks. After an edit, Download PDF stays disabled until the updated pages finish rendering. Older generation responses are discarded so they cannot replace your latest changes. To print, open the downloaded PDF in a PDF viewer.
+6. Save named versions or download the selected resume as Markdown. Opening a saved version automatically backs up the outgoing work.
+
+## Master Markdown format
+
+### Tagged bullets
+
+Append `<!-- tags: network, cyber -->` to a work, project, or education bullet. **Build by job tags** selects matching bullets across entries; choose Any for a union or All for an intersection. Nonmatching work and project entries are omitted, while education credentials remain. Skills and certifications stay manually selectable. No matches leave the current selection intact. Tags and general HTML comments stay in the master file but are excluded from resume exports. `## Certifications in Progress` keeps pending credentials separate from earned certifications.
+
+See [sample.md](sample.md) for a complete fictional example.
+
+- `# Your Name` identifies you.
+- `## Basic Info` holds contact lines, optionally written `- Email: value`.
+- `## Summary` contains introductory paragraphs.
+- `## Skills` accepts comma- or semicolon-separated skills, optionally grouped with `Languages:` or `Tools:`.
+- `## Experience`, `## Projects`, `## Education`, and `## Certifications` hold `### Entry title | Organization` entries. Plain lines below an entry are dates or metadata; bullets are separately selectable achievements.
+- Common heading variants including Work Experience, Technical Skills, and Certification are accepted. Unknown sections are reported instead of silently incorporated.
+- Basic bold, inline code, and Markdown links become plain resume text. Arbitrary HTML is displayed as text and cannot execute. Tables, images, embedded HTML layouts, and arbitrary nested Markdown are not supported.
+
+## Privacy and storage
+
+Profile data, editor drafts, and saved versions live in this browser's local storage at the app's address. For direct PDF export, the browser sends the current resume snapshot to the local Node server on your computer. The server generates the PDF in memory and returns it without saving the resume or logging its contents. Preview refreshes use this same local endpoint. Nothing is sent to an external PDF service. There are no analytics, remote fonts, or AI services. Initial package installation needs internet access; normal operation and PDF generation work offline. Local storage is not encrypted. Clearing browser data removes the workspace, and changing the port or browser uses separate storage. Download Markdown backups for important work; exports do not include all saved versions. Avoid editing the same workspace in multiple tabs concurrently.
+
+## Development
+
+Built with JavaScript, CSS, Node.js, pdf-lib, and fontkit. This keeps setup small and portable. It can later be packaged into a desktop app with Tauri if a native installer is needed.
+
+```sh
+node --test
+```
+
+Direct PDF fonts are read from `%WINDIR%/Fonts` on Windows. The supported regular/bold font pairs are `arial.ttf` / `arialbd.ttf`, `calibri.ttf` / `calibrib.ttf`, `georgia.ttf` / `georgiab.ttf`, and `times.ttf` / `timesbd.ttf`. To use another machine, set `FOLIO_FONT_DIR` to a directory containing the required licensed font files. Fonts are not bundled or silently substituted; missing files or unsupported characters produce an actionable export error.
+
+Files: `pdf-export.mjs` typesets and paginates direct PDFs, `profile.js` parses and matches content, `app.js` manages local state and the UI, `style.css` defines the app and print layouts, and `server.mjs` serves an explicit allowlist of static files. Tests cover parsing, heading aliases, keyword boundaries, selections, saved appearance defaults, PDF font embedding, page dimensions, and multipage output.
+
+## Exact PDF preview
+
+`pdf-preview.js` renders the generated document with a locally bundled PDF.js 5.6.205 worker (`vendor/`, Apache 2.0 license included). It retains the original PDF Blob and uses it for downloads without requesting a second export. Edits are debounced for 400 ms; stale responses are discarded, failed previews offer a retry, and downloads are disabled until the current preview is ready. Preview canvases are display-only; the downloaded document retains embedded fonts and selectable text.
+

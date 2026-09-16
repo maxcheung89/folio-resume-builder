@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173e35"><title>Folio — Your story, thoughtfully tailored</title>
+  <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/design.css"><script type="module" src="/app.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="Folio home"><span class="brand-icon">f.</span> folio<span class="brand-dot">●</span></a>
+    <div class="workspace-label">YOUR WORKSPACE</div>
+    <nav aria-label="Workspace">
+      <button class="nav-item active" data-view="builder"><span>▤</span> Resume builder</button>
+      <button class="nav-item" data-view="source"><span>≡</span> Master profile</button>
+      <button class="nav-item" data-view="versions"><span>▧</span> Saved resumes <span id="version-count" class="nav-count">0</span></button>
+    </nav>
+    <div class="sidebar-note"><span class="note-icon">✦</span><strong>One profile.<br>Every possibility.</strong><p>Keep your whole story in Markdown. Share the parts that matter.</p><button id="guide-button" class="text-button">Markdown guide ↗</button></div>
+    <div class="privacy"><span class="status-dot"></span><div>Private by design<small>Your data stays in this browser</small></div></div>
+  </aside>
+  <main>
+    <header class="topbar"><div>Workspace <span>/</span> <strong id="breadcrumb">Resume builder</strong></div><div class="autosave"><span class="status-dot"></span><span id="save-status">Saved on this device</span></div></header>
+    <section id="builder-view" class="view">
+      <div class="page-heading"><div><div class="eyebrow">YOUR RESUME WORKSPACE</div><h1>Make it yours.</h1><p>Choose your content, refine your summary, and set your style.</p></div><button id="import-button" class="button secondary">↑ <span>Import Markdown</span></button></div>
+      <span id="profile-badge" class="hidden">Profile loaded</span>
+      <div class="builder-grid">
+        <div class="controls">
+          <div class="editor-tabs" role="tablist" aria-label="Resume editor">
+            <button role="tab" id="tab-content" data-panel="content" aria-selected="true" aria-controls="panel-content">Content</button>
+            <button role="tab" id="tab-summary" data-panel="summary" aria-selected="false" aria-controls="panel-summary" tabindex="-1">Summary</button>
+            <button role="tab" id="tab-design" data-panel="design" aria-selected="false" aria-controls="panel-design" tabindex="-1">Design</button>
+          </div>
+          <div id="panel-content" role="tabpanel" aria-labelledby="tab-content">
+          <section class="card target-card"><div class="card-heading"><span class="section-icon">⌁</span><div><h2>The opportunity</h2><p>Give this version a direction.</p></div></div>
+            <label for="job-title">Target role</label><input id="job-title" placeholder="e.g. Senior Software Engineer" maxlength="150">
+            <details id="job-details"><summary>Add a job description <span>Optional</span></summary><label class="sr-only" for="job-description">Job description</label><textarea id="job-description" rows="5" placeholder="Paste the job description to find matching skills and achievements…"></textarea><button id="suggest-button" class="button secondary full">✦ Select matching content</button><p class="field-hint">Keyword matching uses only facts in your profile. Review the selections before exporting.</p></details>
+            <p id="match-result" class="match-result" aria-live="polite"></p>
+          </section>
+          <section class="card tag-card"><div class="card-heading"><span class="section-icon">#</span><div><h2>Build by job tags</h2><p>Pull matching bullets from your whole profile.</p></div></div><details class="tag-disclosure"><summary>Choose job tags</summary><div id="tag-options" class="skill-chips"></div></details><div class="tag-actions"><label for="tag-mode">Match</label><select id="tag-mode"><option value="any">Any selected tag</option><option value="all">All selected tags</option></select><button id="apply-tags" class="button primary">Select tagged bullets</button></div><p class="field-hint">Select network, cyber, or another area. Matches replace experience, project, and teaching bullet selections. Skills and credentials remain available for manual selection. Tags never appear in your exported resume.</p><p id="tag-result" class="match-result" aria-live="polite"></p></section>
+          <section class="card content-card"><div class="card-heading"><span class="section-icon">☷</span><div><h2>Curate your story</h2><p>Choose what belongs in this resume.</p></div><span id="selected-count" class="pill"></span></div><div id="selection-sections"></div></section>
+          </div>
+          <section id="panel-summary" class="card editor-panel hidden" role="tabpanel" aria-labelledby="tab-summary">
+            <h2>A focused introduction</h2><p class="field-hint">Start with a job category or reuse a summary you saved.</p>
+            <label for="summary-template">Summary template</label><select id="summary-template"></select>
+            <p id="summary-template-preview" class="summary-template-preview"></p>
+            <button id="use-summary" class="button secondary full">Use this summary</button>
+            <div class="template-actions"><button id="delete-summary" class="text-button">Delete selected template</button><button id="restore-summary" class="text-button" hidden>Restore last deleted template</button></div>
+            <div class="panel-divider"></div>
+            <label class="entry-select"><input id="include-summary" type="checkbox">Include summary in resume</label>
+            <label for="summary-editor">Your summary</label><textarea id="summary-editor" class="summary-text" rows="9"></textarea>
+            <label for="summary-name">Save as a reusable template</label><input id="summary-name" maxlength="100" placeholder="e.g. Network engineer — concise">
+            <button id="save-summary" class="button primary full">Save summary template</button><p class="field-hint">Saved on this device for this profile. Applying a template changes only the summary.</p>
+          </section>
+          <section id="panel-design" class="card editor-panel hidden" role="tabpanel" aria-labelledby="tab-design">
+            <h2>Professional styles</h2><p class="field-hint">Every setting carries through to PDF and saved versions.</p>
+            <div class="layout-row"><div><label for="template">Layout</label><select id="template"><option value="modern">Modern</option><option value="classic">Classic</option><option value="executive">Executive</option><option value="compact">Compact</option></select></div><div><span id="alignment-label" class="control-label">Alignment</span><div class="alignment-buttons" role="group" aria-labelledby="alignment-label"><button type="button" data-alignment="left" aria-pressed="true">Left</button><button type="button" data-alignment="center" aria-pressed="false">Center</button></div></div></div>
+            <div class="design-fields">
+              <div><label for="resume-font">Font</label><select id="resume-font"><option value="arial">Arial</option><option value="calibri">Calibri / Carlito</option><option value="georgia">Georgia</option><option value="times">Times New Roman</option></select></div>
+              <div><label for="font-size">Body size</label><select id="font-size"><option value="10">10 pt</option><option value="11">11 pt</option><option value="12">12 pt</option></select></div>
+              <div><label for="color-theme">Color theme</label><select id="color-theme"><option value="forest">Forest</option><option value="navy">Navy</option><option value="charcoal">Charcoal</option><option value="burgundy">Burgundy</option></select></div>
+              <div><label for="line-spacing">Spacing</label><select id="line-spacing"><option value="tight">Tight</option><option value="balanced">Balanced</option><option value="airy">Airy</option></select></div>
+            </div>
+            <p class="field-hint">Alignment applies to your name, contact details, and section headings in every layout. Body text stays left aligned.</p>
+            <label for="paper-size">Paper size</label><select id="paper-size"><option value="a4">A4</option><option value="letter">US Letter</option></select>
+            <div class="panel-divider"></div><h2>Section order</h2><p class="field-hint">Move sections up or down. Empty sections stay hidden in the resume.</p><div id="section-order"></div><button id="reset-order" class="text-button">Reset section order</button>
+          </section>
+        </div>
+        <div class="preview-column">
+          <div class="preview-toolbar"><div><span class="status-dot"></span><strong>Live preview</strong><span class="preview-label">Updates as you go</span></div><span id="style-label" class="pill">Modern</span></div>
+          <div id="pdf-preview-status" role="status" class="pdf-preview-status">Preparing PDF preview…</div>
+          <div class="paper-stage"><div id="pdf-pages" role="region" aria-label="PDF resume preview" aria-busy="true"></div></div>
+          <div class="preview-footer"><span>Simple formatting. Ready for applicant tracking systems.</span><span id="word-count"></span></div>
+          <div class="export-bar"><button id="save-version" class="button secondary">▧ Save version</button><button id="export-pdf" class="button primary" disabled>Download PDF <span>↓</span></button></div><p class="export-hint">Download saves the exact PDF displayed above. To print, open the downloaded file.</p>
+          <button id="export-markdown" class="text-button export-md">Download this resume as Markdown ↗</button>
+        </div>
+      </div>
+    </section>
+    <section id="source-view" class="view hidden"><div class="page-heading"><div><div class="eyebrow">THE COMPLETE PICTURE</div><h1>Your master profile.</h1><p>One Markdown file for everything you bring to the table.</p></div><button id="download-source" class="button secondary">↓ Download Markdown</button></div><div class="source-grid"><section class="card source-card"><div class="card-heading"><h2>Profile editor</h2><span class="pill">.md</span></div><label class="sr-only" for="markdown-editor">Master Markdown profile</label><textarea id="markdown-editor" spellcheck="false"></textarea><div class="source-actions"><button id="apply-source" class="button primary">Apply profile</button><button id="source-import" class="button secondary">Import file</button><span id="source-state">No unapplied edits</span></div><p class="field-hint">Applying a profile selects all its content and replaces your current selections. Saved resume versions keep their own copy.</p></section><aside class="card guide-card"><h2>A small format.<br>A complete story.</h2><p>Start with your name, add section headings, and use bullets for achievements.</p><pre># Your Name
+
+## Basic Info
+- Email: you@example.com
+- Location: City, Country
+
+## Summary
+A short introduction.
+
+## Skills
+- Languages: Rust, Python
+- Tools: Git, Docker
+
+## Experience
+### Role | Company
+2022 - Present | City
+- A measurable achievement. &lt;!-- tags: network, cyber --&gt;
+
+## Projects
+### Project name
+- What you built and why.
+
+## Education
+### Degree | University
+2018 - 2022
+
+## Certifications
+### Certification name
+2024 | Issuer
+
+## Certifications in Progress
+### Credential name
+Exam scheduled: date</pre><a class="text-button" href="/sample.md" download="master-profile-template.md">Download example profile ↗</a><p class="field-hint">Add comma-separated tags inside an HTML comment at the end of a bullet. Multiple tags allow the same bullet to support different roles. Untagged bullets remain manually selectable. General comments are kept in your master file but hidden from the resume.</p></aside></div><div id="parse-warnings" role="status"></div></section>
+    <section id="versions-view" class="view hidden"><div class="page-heading"><div><div class="eyebrow">BUILT FOR YOUR NEXT MOVE</div><h1>A resume for every opportunity.</h1><p>Saved versions include your profile, selections, summary, and layout.</p></div></div><div id="versions-list" class="versions-grid"></div></section>
+  </main>
+  <input id="file-input" type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
+  <div id="toast" role="status" class="toast hidden"></div>
+  <dialog id="save-dialog"><form id="version-form"><div class="eyebrow">KEEP THIS VERSION</div><h2>Give your resume a name.</h2><label for="version-name">Version name</label><input id="version-name" maxlength="100" required placeholder="e.g. Frontend Engineer — Northstar"><div class="dialog-actions"><button id="cancel-save" type="button" class="button secondary">Cancel</button><button type="submit" class="button primary">Save version</button></div></form></dialog>
+</body>
+</html>
