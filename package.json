@@ -1,6 +1,6 @@
 {
   "name": "folio-resume-builder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "A private, Markdown-first resume builder",
@@ -16,3 +16,4 @@
     "pdf-lib": "1.17.1"
   }
 }
+

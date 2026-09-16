@@ -1,16 +1,26 @@
 import { PDFDocument, rgb } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import { readFile } from 'node:fs/promises';
-import path from 'node:path';
+
 import { parseProfile, selectedContact, LABELS } from './profile.js';
 import { appearance } from './preferences.js';
 
-const fontFiles = { arial: ['arial.ttf', 'arialbd.ttf'], calibri: ['calibri.ttf', 'calibrib.ttf'], georgia: ['georgia.ttf', 'georgiab.ttf'], times: ['times.ttf', 'timesbd.ttf'] };
+// Keep the stored keys compatible with saved resumes; display names identify the bundled fonts.
+const fontFiles = {
+  arial: ['Lato-Regular.ttf', 'Lato-Bold.ttf'],
+  calibri: ['Carlito-Regular.ttf', 'Carlito-Bold.ttf'],
+  georgia: ['PT_Serif-Web-Regular.ttf', 'PT_Serif-Web-Bold.ttf'],
+  times: ['Tinos-Regular.ttf', 'Tinos-Bold.ttf'],
+};
 const fontCache = new Map();
 async function loadFonts(family) {
   if (!fontCache.has(family)) {
-    const directory = process.env.FOLIO_FONT_DIR || path.join(process.env.WINDIR || 'C:/Windows', 'Fonts');
-    fontCache.set(family, Promise.all(fontFiles[family].map(file => readFile(path.join(directory, file)))).catch(error => { fontCache.delete(family); throw new Error(`Cannot load ${family} fonts. Set FOLIO_FONT_DIR to a folder containing ${fontFiles[family].join(' and ')}.`); }));
+    fontCache.set(family, Promise.all(fontFiles[family].map(file =>
+      readFile(new URL(`./vendor/${file}`, import.meta.url))
+    )).catch(() => {
+      fontCache.delete(family);
+      throw new Error('Bundled resume fonts are missing. Extract the complete Folio download, including the vendor folder, and restart the server.');
+    }));
   }
   return fontCache.get(family);
 }
@@ -117,3 +127,4 @@ export async function createResumePdf(input) {
   doc.setTitle(input.title.trim() || 'Resume'); doc.setCreator('Folio'); doc.setProducer('Folio / pdf-lib');
   return doc.save();
 }
+

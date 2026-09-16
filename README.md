@@ -4,7 +4,7 @@ A private, local resume app. Keep a master Markdown profile, choose the content 
 
 ## Download and run locally
 
-**Requirements:** Node.js 20 or newer and a modern browser. Windows is the easiest supported setup because PDF generation uses Windows fonts. No API key or cloud account is needed.
+**Requirements:** Node.js 20 or newer and a modern browser. Works on Windows, macOS, and Linux with bundled resume fonts. No API key or cloud account is needed.
 
 1. Select **Code → Download ZIP** on GitHub and extract the ZIP, or clone this repository.
 2. Install Node.js from https://nodejs.org and open a terminal in the extracted app folder.
@@ -23,14 +23,14 @@ The app listens only on your computer. Set `PORT` to choose another port. Normal
 
 ### macOS and Linux
 
-The app server runs on Node.js, but PDF preview/export currently requires compatible regular and bold TrueType font files. Set `FOLIO_FONT_DIR` to a directory containing the files listed under Development below. Arial is selected initially. Supply fonts you are licensed to use; Microsoft fonts are not distributed with this project. Without the selected fonts, PDF preview/export will report a missing-font error.
+Use the same `npm install` and `npm start` commands above. Version 1.0.1 bundles all resume fonts: no Microsoft Office, system font installation, or `FOLIO_FONT_DIR` setting is needed. Stop the old server before starting the updated copy, then refresh the browser. Keeping the same browser and port preserves your locally saved workspace.
 
 ### Troubleshooting
 
 - **node/npm not recognized:** install Node.js, then open a new terminal.
 - **Connection refused:** run `npm start` and keep its terminal open.
 - **Port already in use:** close your earlier Folio server or choose another `PORT`.
-- **Cannot load fonts:** install the selected font pair or configure `FOLIO_FONT_DIR` as described below.
+- **Bundled resume fonts are missing:** extract the entire download, including `vendor/`, then restart the server. If you still see the old `FOLIO_FONT_DIR` error, the old server is running; stop it with Ctrl+C and start version 1.0.1.
 - **Your work disappeared:** use the same browser and port; workspaces are stored in browser local storage. Export Markdown backups regularly.
 
 ## Workflow
@@ -39,7 +39,7 @@ The builder is organized into three tabs:
 
 - **Content**: target role, optional job matching, collapsible job tags, and individual section selections.
 - **Summary**: preview and apply a category draft, edit the active summary, or save a named reusable template. Templates are stored locally per profile. Every profile starts with its own master summary. Write and save reusable category templates using your own experience. Applying a draft changes only the summary, not selected experience.
-- **Design**: four layouts (Modern, Classic, Executive, Compact), four font families, 10/11/12 pt body sizes, four color themes, three spacing settings, and section-order arrows. The screen uses locally installed fonts. Direct PDFs embed the selected font from your computer. Paper size is also set here. The preview renders the actual generated PDF pages using PDF.js; Download PDF saves those same bytes.
+- **Design**: four layouts (Modern, Classic, Executive, Compact), four font families, 10/11/12 pt body sizes, four color themes, three spacing settings, and section-order arrows. Direct PDFs embed the bundled Lato, Carlito, PT Serif, or Tinos fonts on every operating system. Paper size is also set here. The preview renders the actual generated PDF pages using PDF.js; Download PDF saves those same bytes.
 
 Saved resume versions preserve all design settings and section order. Older versions receive defaults for newly added settings. Section order also applies to Markdown exports. The complete master Markdown is not reordered. Summary templates remain available independently of saved resume versions.
 
@@ -82,11 +82,12 @@ Built with JavaScript, CSS, Node.js, pdf-lib, and fontkit. This keeps setup smal
 node --test
 ```
 
-Direct PDF fonts are read from `%WINDIR%/Fonts` on Windows. The supported regular/bold font pairs are `arial.ttf` / `arialbd.ttf`, `calibri.ttf` / `calibrib.ttf`, `georgia.ttf` / `georgiab.ttf`, and `times.ttf` / `timesbd.ttf`. To use another machine, set `FOLIO_FONT_DIR` to a directory containing the required licensed font files. Fonts are not bundled or silently substituted; missing files or unsupported characters produce an actionable export error.
+PDF font pairs are read relative to the app from `vendor/`, independent of the operating system and working directory. Lato, Carlito, PT Serif, and Tinos include regular/bold files and SIL Open Font License notices. Existing saved font choices migrate in order: Arial to Lato, Calibri to Carlito, Georgia to PT Serif, and Times New Roman to Tinos. Their typography may differ from version 1.0.0, but the live preview and downloaded PDF always match. `FOLIO_FONT_DIR` is no longer used.
 
 Files: `pdf-export.mjs` typesets and paginates direct PDFs, `profile.js` parses and matches content, `app.js` manages local state and the UI, `style.css` defines the app and print layouts, and `server.mjs` serves an explicit allowlist of static files. Tests cover parsing, heading aliases, keyword boundaries, selections, saved appearance defaults, PDF font embedding, page dimensions, and multipage output.
 
 ## Exact PDF preview
 
 `pdf-preview.js` renders the generated document with a locally bundled PDF.js 5.6.205 worker (`vendor/`, Apache 2.0 license included). It retains the original PDF Blob and uses it for downloads without requesting a second export. Edits are debounced for 400 ms; stale responses are discarded, failed previews offer a retry, and downloads are disabled until the current preview is ready. Preview canvases are display-only; the downloaded document retains embedded fonts and selectable text.
+
 
