@@ -54,11 +54,21 @@
             <h2>Professional styles</h2><p class="field-hint">Every setting carries through to PDF and saved versions.</p>
             <div class="layout-row"><div><label for="template">Layout</label><select id="template"><option value="modern">Modern</option><option value="classic">Classic</option><option value="executive">Executive</option><option value="compact">Compact</option></select></div><div><span id="alignment-label" class="control-label">Alignment</span><div class="alignment-buttons" role="group" aria-labelledby="alignment-label"><button type="button" data-alignment="left" aria-pressed="true">Left</button><button type="button" data-alignment="center" aria-pressed="false">Center</button></div></div></div>
             <div class="design-fields">
-              <div><label for="resume-font">Font</label><select id="resume-font"><option value="arial">Lato</option><option value="calibri">Carlito</option><option value="georgia">PT Serif</option><option value="times">Tinos</option></select></div>
+              <div><label for="resume-font">Font</label><select id="resume-font"><option value="arial">Lato</option><option value="calibri">Carlito</option><option value="georgia">PT Serif</option><option value="times">Tinos</option><option value="ptsans">PT Sans</option><option value="plexmono">IBM Plex Mono</option></select></div>
               <div><label for="font-size">Body size</label><select id="font-size"><option value="10">10 pt</option><option value="11">11 pt</option><option value="12">12 pt</option></select></div>
               <div><label for="color-theme">Color theme</label><select id="color-theme"><option value="forest">Forest</option><option value="navy">Navy</option><option value="charcoal">Charcoal</option><option value="burgundy">Burgundy</option></select></div>
               <div><label for="line-spacing">Spacing</label><select id="line-spacing"><option value="tight">Tight</option><option value="balanced">Balanced</option><option value="airy">Airy</option></select></div>
             </div>
+            <details class="custom-font-panel"><summary>Add your own font</summary>
+              <p class="field-hint">Static TTF or OTF, up to 2 MB per file. Stored in this browser; sent only to your local Folio server. Use a font you are licensed to embed.</p>
+              <label for="custom-font-name">Font name</label><input id="custom-font-name" maxlength="60" placeholder="My resume font">
+              <label for="custom-font-regular">Regular font</label><input id="custom-font-regular" type="file" accept=".ttf,.otf">
+              <label for="custom-font-bold">Bold font (optional)</label><input id="custom-font-bold" type="file" accept=".ttf,.otf">
+              <p class="field-hint">Without a bold file, headings use the regular font. Variable fonts, TTC collections, and web fonts are unsupported.</p>
+              <button id="add-custom-font" class="button secondary" type="button">Validate and add font</button>
+              <button id="remove-custom-font" class="text-button" type="button" disabled>Remove selected custom font</button>
+              <p id="custom-font-status" class="field-hint" role="status"></p>
+            </details>
             <p class="field-hint">Alignment applies to your name, contact details, and section headings in every layout. Body text stays left aligned.</p>
             <label for="paper-size">Paper size</label><select id="paper-size"><option value="a4">A4</option><option value="letter">US Letter</option></select>
             <div class="panel-divider"></div><h2>Section order</h2><p class="field-hint">Move sections up or down. Empty sections stay hidden in the resume.</p><div id="section-order"></div><button id="reset-order" class="text-button">Reset section order</button>
@@ -74,7 +84,7 @@
         </div>
       </div>
     </section>
-    <section id="source-view" class="view hidden"><div class="page-heading"><div><div class="eyebrow">THE COMPLETE PICTURE</div><h1>Your master profile.</h1><p>One Markdown file for everything you bring to the table.</p></div><button id="download-source" class="button secondary">↓ Download Markdown</button></div><div class="source-grid"><section class="card source-card"><div class="card-heading"><h2>Profile editor</h2><span class="pill">.md</span></div><label class="sr-only" for="markdown-editor">Master Markdown profile</label><textarea id="markdown-editor" spellcheck="false"></textarea><div class="source-actions"><button id="apply-source" class="button primary">Apply profile</button><button id="source-import" class="button secondary">Import file</button><span id="source-state">No unapplied edits</span></div><p class="field-hint">Applying a profile selects all its content and replaces your current selections. Saved resume versions keep their own copy.</p></section><aside class="card guide-card"><h2>A small format.<br>A complete story.</h2><p>Start with your name, add section headings, and use bullets for achievements.</p><pre># Your Name
+    <section id="source-view" class="view hidden"><div class="page-heading"><div><div class="eyebrow">THE COMPLETE PICTURE</div><h1>Your master profile.</h1><p>One Markdown file for everything you bring to the table.</p></div><button id="download-source" class="button secondary">↓ Download Markdown</button></div><div class="source-grid"><section class="card source-card"><div class="card-heading"><h2>Profile editor</h2><span class="pill">.md</span></div><label class="sr-only" for="markdown-editor">Master Markdown profile</label><textarea id="markdown-editor" spellcheck="false"></textarea><div class="source-actions"><button id="apply-source" class="button primary">Apply profile</button><button id="source-import" class="button secondary">Import file</button><span id="source-state">No unapplied edits</span></div><p class="field-hint">Applying a profile selects all its content and replaces your current selections. Saved resume versions keep their own copy.</p></section><aside class="card guide-card"><button id="copy-ai-prompt" class="button secondary" type="button">Copy AI Markdown prompt</button><a class="text-button" href="/AI-MARKDOWN-PROMPT.md" download>Download AI prompt ↗</a><p class="field-hint">Paste the prompt into your AI tool with your resume or career notes, then import the resulting .md file here.</p><h2>A small format.<br>A complete story.</h2><p>Start with your name, add section headings, and use bullets for achievements.</p><pre># Your Name
 
 ## Basic Info
 - Email: you@example.com
@@ -114,4 +124,5 @@ Exam scheduled: date</pre><a class="text-button" href="/sample.md" download="mas
   <dialog id="save-dialog"><form id="version-form"><div class="eyebrow">KEEP THIS VERSION</div><h2>Give your resume a name.</h2><label for="version-name">Version name</label><input id="version-name" maxlength="100" required placeholder="e.g. Frontend Engineer — Northstar"><div class="dialog-actions"><button id="cancel-save" type="button" class="button secondary">Cancel</button><button type="submit" class="button primary">Save version</button></div></form></dialog>
 </body>
 </html>
+
 

@@ -12,7 +12,7 @@ export function appearance(value = {}) {
   const option = (key, choices, fallback) => choices.includes(value[key]) ? value[key] : fallback;
   return {
     template: option('template', ['modern', 'classic', 'executive', 'compact'], 'modern'),
-    font: option('font', ['arial', 'calibri', 'georgia', 'times'], 'arial'),
+    font: /^custom-[a-f0-9-]{36}$/.test(value.font || '') ? value.font : option('font', ['arial', 'calibri', 'georgia', 'times', 'ptsans', 'plexmono'], 'arial'),
     fontSize: option('fontSize', ['10', '11', '12'], '11'),
     theme: option('theme', ['forest', 'navy', 'charcoal', 'burgundy'], 'forest'),
     spacing: option('spacing', ['tight', 'balanced', 'airy'], 'balanced'),
@@ -24,3 +24,4 @@ export function appearance(value = {}) {
 export function starterSummaries(profile) {
   return [{ id: 'master', name: 'Original master summary', text: profile.summary.join('\n\n') }];
 }
+

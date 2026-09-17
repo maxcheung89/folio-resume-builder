@@ -3,6 +3,7 @@ import fontkit from '@pdf-lib/fontkit';
 import { readFile } from 'node:fs/promises';
 
 import { parseProfile, selectedContact, LABELS } from './profile.js';
+import { decodeCustomFont } from './font-validation.mjs';
 import { appearance } from './preferences.js';
 
 // Keep the stored keys compatible with saved resumes; display names identify the bundled fonts.
@@ -11,6 +12,8 @@ const fontFiles = {
   calibri: ['Carlito-Regular.ttf', 'Carlito-Bold.ttf'],
   georgia: ['PT_Serif-Web-Regular.ttf', 'PT_Serif-Web-Bold.ttf'],
   times: ['Tinos-Regular.ttf', 'Tinos-Bold.ttf'],
+  ptsans: ['PT_Sans-Web-Regular.ttf', 'PT_Sans-Web-Bold.ttf'],
+  plexmono: ['IBMPlexMono-Regular.ttf', 'IBMPlexMono-Bold.ttf'],
 };
 const fontCache = new Map();
 async function loadFonts(family) {
@@ -32,9 +35,13 @@ export async function createResumePdf(input) {
   validatePdfInput(input);
   const profile = parseProfile(input.markdown), selected = new Set(input.selected), style = appearance(input);
   const doc = await PDFDocument.create(); doc.registerFontkit(fontkit);
-  const buffers = await loadFonts(style.font);
-  const normal = await doc.embedFont(buffers[0], { subset: true }), bold = await doc.embedFont(buffers[1], { subset: true });
-  const supported = new Set(normal.getCharacterSet());
+  const buffers = style.font.startsWith('custom-')
+    ? [decodeCustomFont(input.customFont?.regular), decodeCustomFont(input.customFont?.bold || input.customFont?.regular)]
+    : await loadFonts(style.font);
+  // Subsetting Carlito corrupts composite glyphs in fontkit. Full embedding also
+  // preserves uploaded fonts faithfully across PDF.js, Preview, and other readers.
+  const normal = await doc.embedFont(buffers[0], { subset: false, features: { liga: false, clig: false, dlig: false, calt: false } }), bold = await doc.embedFont(buffers[1], { subset: false, features: { liga: false, clig: false, dlig: false, calt: false } });
+  const supported = new Set(normal.getCharacterSet().filter(code => bold.getCharacterSet().includes(code)));
   const clean = value => {
     const text = String(value).replace(/\r\n?/g, '\n').replace(/\t/g, ' ').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
     const missing = [...new Set([...text].filter(c => c !== '\n' && !supported.has(c.codePointAt(0))))];
@@ -127,4 +134,7 @@ export async function createResumePdf(input) {
   doc.setTitle(input.title.trim() || 'Resume'); doc.setCreator('Folio'); doc.setProducer('Folio / pdf-lib');
   return doc.save();
 }
+
+
+
 

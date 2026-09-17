@@ -11,6 +11,8 @@ const files = new Map([
   ['/profile.js', ['profile.js', 'text/javascript']], ['/sample.md', ['sample.md', 'text/markdown']],
   ['/preferences.js', ['preferences.js', 'text/javascript']], ['/design.css', ['design.css', 'text/css']],
   ['/pdf-preview.js', ['pdf-preview.js', 'text/javascript']],
+  ['/custom-fonts.js', ['custom-fonts.js', 'text/javascript']],
+  ['/AI-MARKDOWN-PROMPT.md', ['AI-MARKDOWN-PROMPT.md', 'text/markdown']],
   ['/vendor/pdf.min.mjs', ['vendor/pdf.min.mjs', 'text/javascript']],
   ['/vendor/pdf.worker.min.mjs', ['vendor/pdf.worker.min.mjs', 'text/javascript']],
 ]);
@@ -23,7 +25,7 @@ const server = http.createServer(async (req, res) => {
       const chunks = []; let length = 0;
       for await (const chunk of req) {
         length += chunk.length;
-        if (length > 2 * 1024 * 1024) { res.writeHead(413); res.end('Resume is too large'); return; }
+        if (length > 8 * 1024 * 1024) { res.writeHead(413); res.end('Resume is too large'); return; }
         chunks.push(chunk);
       }
       const data = JSON.parse(Buffer.concat(chunks).toString('utf8')); validatePdfInput(data);
@@ -48,3 +50,4 @@ const server = http.createServer(async (req, res) => {
 });
 server.on('error', error => { console.error(`Cannot start Folio: ${error.message}`); process.exitCode = 1; });
 server.listen(Number(process.env.PORT || 4173), '127.0.0.1', () => console.log(`Folio is ready at http://127.0.0.1:${server.address().port}`));
+

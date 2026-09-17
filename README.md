@@ -39,7 +39,7 @@ The builder is organized into three tabs:
 
 - **Content**: target role, optional job matching, collapsible job tags, and individual section selections.
 - **Summary**: preview and apply a category draft, edit the active summary, or save a named reusable template. Templates are stored locally per profile. Every profile starts with its own master summary. Write and save reusable category templates using your own experience. Applying a draft changes only the summary, not selected experience.
-- **Design**: four layouts (Modern, Classic, Executive, Compact), four font families, 10/11/12 pt body sizes, four color themes, three spacing settings, and section-order arrows. Direct PDFs embed the bundled Lato, Carlito, PT Serif, or Tinos fonts on every operating system. Paper size is also set here. The preview renders the actual generated PDF pages using PDF.js; Download PDF saves those same bytes.
+- **Design**: four layouts (Modern, Classic, Executive, Compact), six bundled font families, 10/11/12 pt body sizes, four color themes, three spacing settings, and section-order arrows. Direct PDFs embed the bundled Lato, Carlito, PT Serif, Tinos, PT Sans, or IBM Plex Mono fonts on every operating system. Paper size is also set here. The preview renders the actual generated PDF pages using PDF.js; Download PDF saves those same bytes.
 
 Saved resume versions preserve all design settings and section order. Older versions receive defaults for newly added settings. Section order also applies to Markdown exports. The complete master Markdown is not reordered. Summary templates remain available independently of saved resume versions.
 
@@ -82,7 +82,7 @@ Built with JavaScript, CSS, Node.js, pdf-lib, and fontkit. This keeps setup smal
 node --test
 ```
 
-PDF font pairs are read relative to the app from `vendor/`, independent of the operating system and working directory. Lato, Carlito, PT Serif, and Tinos include regular/bold files and SIL Open Font License notices. Existing saved font choices migrate in order: Arial to Lato, Calibri to Carlito, Georgia to PT Serif, and Times New Roman to Tinos. Their typography may differ from version 1.0.0, but the live preview and downloaded PDF always match. `FOLIO_FONT_DIR` is no longer used.
+PDF font pairs are read relative to the app from `vendor/`, independent of the operating system and working directory. Lato, Carlito, PT Serif, Tinos, PT Sans, and IBM Plex Mono include regular/bold files and SIL Open Font License notices. Existing saved font choices migrate in order: Arial to Lato, Calibri to Carlito, Georgia to PT Serif, and Times New Roman to Tinos. Their typography may differ from version 1.0.0, but the live preview and downloaded PDF always match. `FOLIO_FONT_DIR` is no longer used.
 
 Files: `pdf-export.mjs` typesets and paginates direct PDFs, `profile.js` parses and matches content, `app.js` manages local state and the UI, `style.css` defines the app and print layouts, and `server.mjs` serves an explicit allowlist of static files. Tests cover parsing, heading aliases, keyword boundaries, selections, saved appearance defaults, PDF font embedding, page dimensions, and multipage output.
 
@@ -90,4 +90,13 @@ Files: `pdf-export.mjs` typesets and paginates direct PDFs, `profile.js` parses 
 
 `pdf-preview.js` renders the generated document with a locally bundled PDF.js 5.6.205 worker (`vendor/`, Apache 2.0 license included). It retains the original PDF Blob and uses it for downloads without requesting a second export. Edits are debounced for 400 ms; stale responses are discarded, failed previews offer a retry, and downloads are disabled until the current preview is ready. Preview canvases are display-only; the downloaded document retains embedded fonts and selectable text.
 
+
+
+## Fonts and AI-assisted Markdown (v1.0.2)
+
+Six bundled fonts are available: Lato, Carlito, PT Serif, Tinos, PT Sans, and IBM Plex Mono. Complete font embedding fixes Carlito composite glyphs that were corrupted by subsetting. PDFs can be larger as a result. Optional ligatures are disabled to keep copied and extracted text accurate.
+
+In **Design → Add your own font**, select a static TTF or OTF regular font and an optional bold font (2 MB maximum each). Folio validates the font against the current resume before saving it. Without a bold file, the regular face is used for headings. Variable fonts, TTC collections, and WOFF web fonts are unsupported. Fonts are stored in this browser's IndexedDB, independently of resume versions, and sent only to the local Folio server. They are not included in Markdown backups or synchronized to other browsers. Saved versions remember their font choice; if a custom font is unavailable, Folio announces a fallback to Lato. Keep your original font files to re-import on another browser. Only use fonts you are licensed to embed.
+
+Use **Master profile → Copy AI Markdown prompt** or [download the prompt](AI-MARKDOWN-PROMPT.md). Paste it into your AI tool with your career notes or resume. The prompt specifies Folio's supported headings, entry metadata, bullet tags, and factuality rules. Review the generated file before importing it. Folio does not send your profile to any AI service.
 

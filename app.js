@@ -1,3 +1,5 @@
+import { readFonts, saveFont, deleteFont, fontData } from './custom-fonts.js';
+let customFonts = [];
 import { PdfPreview } from './pdf-preview.js';
 import { appearance, normalizeOrder, moveSection, starterSummaries } from './preferences.js';
 import { parseProfile, defaultSelection, matchJob, SECTION_ORDER, ENTRY_SECTIONS, LABELS, resumeMarkdown, profileTags, selectByTags, selectedContact } from './profile.js';
@@ -21,6 +23,9 @@ function switchView(view) {
   if (view === 'versions') renderVersions();
 }
 function syncFields() {
+  if (state.font.startsWith('custom-') && !customFonts.some(font => font.id === state.font)) {
+    state.font = 'arial'; toast('This version’s custom font is unavailable in this browser. Using Lato; re-add the font in Design.');
+  }
   $('#job-title').value = state.title; $('#job-description').value = state.job;
   $('#markdown-editor').value = state.draft ?? state.markdown;
   $('#source-state').textContent = state.draft !== undefined && state.draft !== state.markdown ? 'Unapplied edits saved' : 'No unapplied edits';
@@ -64,7 +69,10 @@ function renderResume() {
   $('#style-label').textContent = `${state.template[0].toUpperCase() + state.template.slice(1)} · ${state.fontSize} pt`;
   const text = resumeMarkdown(profile, selected, state.title, state.summary, state.sectionOrder);
   $('#word-count').textContent = `${text.trim().split(/\s+/).filter(Boolean).length} words`;
-  pdfPreview.update(currentSnapshot());
+  const snapshot = currentSnapshot();
+  const custom = customFonts.find(font => font.id === state.font);
+  $('#remove-custom-font').disabled = !custom;
+  pdfPreview.update({ ...snapshot, ...(custom ? { customFont: { regular: custom.regular, bold: custom.bold } } : {}) });
 }
 function applyMarkdown(markdown) {
   const parsed = parseProfile(markdown);
@@ -87,7 +95,16 @@ function renderVersions() {
 }
 function validSnapshot(value) { return value && typeof value.markdown === 'string' && Array.isArray(value.selected) && value.selected.every(s => typeof s === 'string') && ['title', 'summary', 'job'].every(k => typeof value[k] === 'string') && ['a4', 'letter'].includes(value.paper) && ['modern', 'classic', 'executive', 'compact'].includes(value.template); }
 
+function refreshFontOptions() {
+  document.querySelectorAll('#resume-font option[data-custom]').forEach(option => option.remove());
+  for (const font of customFonts) {
+    const option = document.createElement('option'); option.value = font.id;
+    option.textContent = `Custom — ${font.name}`; option.dataset.custom = 'true'; $('#resume-font').append(option);
+  }
+}
 async function init() {
+  try { customFonts = await readFonts(); refreshFontOptions(); }
+  catch (error) { $('#custom-font-status').textContent = error.message; }
   let saved = null;
   try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) { saved = JSON.parse(raw); if (!validSnapshot(saved) || !Array.isArray(saved.versions) || !saved.versions.every(v => validSnapshot(v) && typeof v.id === 'string' && typeof v.name === 'string')) throw new Error('Invalid saved workspace'); } }
   catch { saved = null; toast('The saved workspace could not be read. Loading the example profile.'); }
@@ -235,6 +252,39 @@ function activatePanel(name) {
   });
 }
 function bindEditor() {
+  $('#copy-ai-prompt').addEventListener('click', async () => {
+    try {
+      const response = await fetch('/AI-MARKDOWN-PROMPT.md');
+      if (!response.ok) throw new Error();
+      await navigator.clipboard.writeText(await response.text()); toast('AI prompt copied. Paste it into your AI tool with your career notes.');
+    } catch { toast('Could not copy. Use Download AI prompt instead.'); }
+  });
+  $('#add-custom-font').addEventListener('click', async () => {
+    const button = $('#add-custom-font'); button.disabled = true;
+    $('#custom-font-status').textContent = 'Validating font…';
+    try {
+      const regularFile = $('#custom-font-regular').files[0], boldFile = $('#custom-font-bold').files[0];
+      const regular = await fontData(regularFile), bold = boldFile ? await fontData(boldFile) : null;
+      const record = { id: `custom-${crypto.randomUUID()}`, name: $('#custom-font-name').value.trim() || regularFile.name.replace(/\.[^.]+$/, ''), regular, bold };
+      const response = await fetch('/api/export-pdf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...currentSnapshot(), font: record.id, customFont: { regular, bold } }) });
+      if (!response.ok) { const error = await response.json(); throw new Error(error.error || 'Font validation failed.'); }
+      await response.arrayBuffer();
+      await saveFont(record); customFonts.push(record); refreshFontOptions();
+      state.font = record.id; $('#resume-font').value = record.id; persist(); renderResume();
+      $('#custom-font-status').textContent = 'Font saved in this browser. It is available in the Font menu.';
+      $('#custom-font-regular').value = ''; $('#custom-font-bold').value = ''; $('#custom-font-name').value = '';
+    } catch (error) { $('#custom-font-status').textContent = error.message; }
+    finally { button.disabled = false; }
+  });
+  $('#remove-custom-font').addEventListener('click', async () => {
+    const id = state.font;
+    if (!customFonts.some(font => font.id === id)) return;
+    try {
+      await deleteFont(id); customFonts = customFonts.filter(font => font.id !== id); refreshFontOptions();
+      state.font = 'arial'; $('#resume-font').value = state.font; persist(); renderResume();
+      $('#custom-font-status').textContent = 'Font removed. Saved versions using it will use Lato until you choose another font.';
+    } catch (error) { $('#custom-font-status').textContent = error.message; }
+  });
   document.querySelectorAll('[data-alignment]').forEach(button => button.addEventListener('click', () => {
     state.alignment = button.dataset.alignment; syncAlignment(); renderResume(); persist();
   }));
@@ -281,3 +331,4 @@ function bindEditor() {
 }
 
 init().catch(error => { console.error(error); $('#save-status').textContent = 'App could not load'; toast('Could not start Folio. Make sure the local server is running, then refresh.'); });
+
